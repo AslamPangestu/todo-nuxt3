@@ -75,13 +75,7 @@ const useAuthStore = defineStore(
       }
     };
 
-    const onLogout = () => {
-      token.value = "";
-      user.user_id = "";
-      user.name = "";
-    };
-
-    return { user, token, onLogin, onRegister, onLogout };
+    return { user, token, onLogin, onRegister };
   },
   {
     persist: true,

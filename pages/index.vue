@@ -67,15 +67,8 @@ const onStatus = (value: string) => {
     <section>
       <FormAdd />
     </section>
-    <section
-      class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4"
-    >
-      <Item
-        :onEdit="onEdit"
-        :onDelete="onDelete"
-        :onUnmark="onUnmark"
-        :onStatus="onStatus"
-      />
+    <section class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
+      <Item :onEdit="onEdit" :onDelete="onDelete" :onUnmark="onUnmark" :onStatus="onStatus" />
     </section>
   </UContainer>
   <FormEdit v-model="isEdit" />

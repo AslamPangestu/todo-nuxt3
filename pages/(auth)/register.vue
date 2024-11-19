@@ -1,55 +1,45 @@
 <script setup lang="ts">
-import { z } from "zod";
 import type { FormSubmitEvent } from "#ui/types";
 
-useHead({ title: "Register" });
+import { RegisterSchema, type RegisterSchemaType } from "@/dtos/user";
+import useAuthStore from "@/stores/auth";
 
+useHead({ title: "Register" });
 definePageMeta({
   layout: "auth",
 });
 
+const store = useAuthStore();
 const toast = useToast();
 
-// TODO: Model User
-const schema = z.object({
-  user_id: z.string().min(8, "Must be at least 8 characters"),
-  name: z.string().min(8, "Must be at least 8 characters"),
-  password: z.string().min(8, "Must be at least 8 characters"),
+const loading = ref<boolean>(false);
+
+const state = reactive<RegisterSchemaType>({
+  user_id: "",
+  name: "",
+  password: "",
+  confirm_password: "",
 });
 
-type Schema = z.output<typeof schema>;
-
-const loading = ref(false);
-
-const state = reactive({
-  user_id: undefined,
-  name: undefined,
-  password: undefined,
-});
-
-// TODO: Hit API
-async function onSubmit(event: FormSubmitEvent<Schema>) {
-  // Do something with data
+async function onSubmit(event: FormSubmitEvent<RegisterSchemaType>) {
+  event.preventDefault();
   loading.value = true;
-  console.log(event.data);
+  const { response, error } = await store.onRegister(event.data);
   loading.value = false;
-  toast.add({ title: "Hello world!" });
+  if (error) {
+    toast.add({ title: "Register Failed", description: error, color: "red" });
+    return;
+  }
+  toast.add({ title: `Welcome ${response?.name}`, color: "green" });
   await navigateTo("/");
 }
 </script>
 
 <template>
-  <UForm
-    :schema="schema"
-    :state="state"
-    class="max-w-96 w-full"
-    @submit="onSubmit"
-  >
+  <UForm :schema="RegisterSchema" :state="state" class="max-w-96 w-full" @submit="onSubmit">
     <UCard>
       <template #header>
-        <h1
-          class="prose prose-2xl text-gray-700 dark:text-gray-200 text-center font-bold"
-        >
+        <h1 class="prose prose-2xl text-gray-700 dark:text-gray-200 text-center font-bold">
           Register
         </h1>
       </template>
@@ -65,23 +55,23 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
         <UFormGroup label="Password" name="password">
           <UInput v-model="state.password" type="password" />
         </UFormGroup>
+
+        <UFormGroup label="Confirm Password" name="confirm_password">
+          <UInput v-model="state.confirm_password" type="password" />
+        </UFormGroup>
       </div>
 
       <template #footer>
         <div class="space-y-4">
           <div class="text-center">
-            <span class="prose prose-sm text-gray-600"
-              >Already have an account?
-              <ULink
-                to="/login"
-                active-class="text-primary"
-                inactive-class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
-              >
+            <span class="prose prose-sm text-gray-600">Already have an account?
+              <ULink to="/login" active-class="text-primary"
+                inactive-class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">
                 Login
-              </ULink></span
-            >
+              </ULink>
+            </span>
           </div>
-          <UButton type="submit" :loading="loading" loading-icon="i-ic-baseline-spinner" block>Register</UButton>
+          <UButton type="submit" :loading="loading" block>Register</UButton>
         </div>
       </template>
     </UCard>
