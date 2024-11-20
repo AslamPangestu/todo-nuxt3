@@ -2,6 +2,7 @@
 import type { FormSubmitEvent } from "#ui/types";
 
 import { LoginSchema, type LoginSchemaType } from "@/dtos/user";
+
 import useAuthStore from "@/stores/auth";
 
 useHead({ title: "Login" });
@@ -34,10 +35,17 @@ const onSubmit = async (event: FormSubmitEvent<LoginSchemaType>) => {
 </script>
 
 <template>
-  <UForm :schema="LoginSchema" :state="state" class="max-w-96 w-full" @submit="onSubmit">
+  <UForm
+    :schema="LoginSchema"
+    :state="state"
+    class="max-w-96 w-full"
+    @submit="onSubmit"
+  >
     <UCard>
       <template #header>
-        <h1 class="prose prose-2xl text-gray-700 dark:text-gray-200 text-center font-bold">
+        <h1
+          class="prose prose-2xl text-gray-700 dark:text-gray-200 text-center font-bold"
+        >
           Login
         </h1>
       </template>
@@ -54,9 +62,13 @@ const onSubmit = async (event: FormSubmitEvent<LoginSchemaType>) => {
       <template #footer>
         <div class="space-y-4">
           <div class="text-center">
-            <span class="prose prose-sm text-gray-600">Don't have an account?
-              <ULink to="/register" active-class="text-primary"
-                inactive-class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">
+            <span class="prose prose-sm text-gray-600"
+              >Don't have an account?
+              <ULink
+                to="/register"
+                active-class="text-primary"
+                inactive-class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+              >
                 Register
               </ULink>
             </span>

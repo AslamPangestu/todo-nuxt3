@@ -26,7 +26,7 @@ const useAuthStore = defineStore(
     };
 
     const onLogin = async (
-      payload: LoginSchemaType
+      payload: LoginSchemaType,
     ): Promise<FetchResponse<UserResponseSchemaType>> => {
       try {
         const response: Response<UserResponseSchemaType> = await $fetch(
@@ -35,7 +35,7 @@ const useAuthStore = defineStore(
             baseURL: runtimeConfig.public.BASE_URL,
             method: "POST",
             body: payload,
-          }
+          },
         );
         setAuth(response.data);
         return { response: response.data, error: null };
@@ -61,7 +61,7 @@ const useAuthStore = defineStore(
               name: payload.name,
               password: payload.password,
             },
-          }
+          },
         );
         setAuth(response.data);
         return { response: response.data, error: null };
@@ -85,7 +85,7 @@ const useAuthStore = defineStore(
   },
   {
     persist: true,
-  }
+  },
 );
 
 export default useAuthStore;

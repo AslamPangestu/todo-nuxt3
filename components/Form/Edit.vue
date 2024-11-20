@@ -1,37 +1,63 @@
 <script setup lang="ts">
-import { z } from "zod";
 import type { FormSubmitEvent } from "#ui/types";
 
+import {
+  FormNoteSchema,
+  type FormNoteSchemaType,
+  type NoteSchemaType,
+} from "@/dtos/note";
+
+import useNoteStore from "@/stores/note";
+
+const props = defineProps<{ data: NoteSchemaType | null }>();
 const model = defineModel({ type: Boolean, required: true, default: false });
+const emit = defineEmits(["success"]);
 
 const toast = useToast();
+const store = useNoteStore();
 
-// TODO: Model Note
-const schema = z.object({
-  title: z.string().min(8, "Must be at least 8 characters"),
-  description: z.string().min(8, "Must be at least 8 characters"),
-});
+const loading = ref<boolean>(false);
 
-type Schema = z.output<typeof schema>;
+const state = reactive({ title: "", description: "" });
 
-const loading = ref(false);
+watch(
+  () => props.data,
+  (nevValue, _oldValue) => {
+    if (nevValue) {
+      state.title = nevValue.title;
+      state.description = nevValue.description;
+    } else {
+      state.title = "";
+      state.description = "";
+    }
+  },
+);
 
-const state = reactive({ title: undefined, description: undefined });
-
-// TODO: Hit API
-async function onSubmit(event: FormSubmitEvent<Schema>) {
-  // Do something with data
+async function onSubmit(event: FormSubmitEvent<FormNoteSchemaType>) {
+  if (!props.data) {
+    return;
+  }
+  event.preventDefault();
   loading.value = true;
-  console.log(event.data);
+  const { error } = await store.onEdit(event.data, props.data.id);
   loading.value = false;
-  model.value = false;
-  toast.add({ title: "Hello world!" });
+  if (error) {
+    toast.add({ title: "Edit Note Failed", description: error, color: "red" });
+    return;
+  }
+  toast.add({ title: "Success Edit Note", color: "green" });
+  emit("success");
 }
 </script>
 
 <template>
   <USlideover v-model="model">
-    <UForm :schema="schema" :state="state" class="h-full" @submit="onSubmit">
+    <UForm
+      :schema="FormNoteSchema"
+      :state="state"
+      class="h-full"
+      @submit="onSubmit"
+    >
       <UCard
         class="h-full flex flex-col"
         :ui="{
@@ -60,7 +86,11 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
             Edit Note
           </h2>
         </template>
-        <FormItem :state="state" title="title" description="description" />
+        <FormItem
+          v-model:title="state.title"
+          v-model:description="state.description"
+          :name="{ title: 'title', description: 'description' }"
+        />
         <template #footer>
           <UButton type="submit" :loading="loading" block>Update</UButton>
         </template>

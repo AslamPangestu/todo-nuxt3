@@ -2,44 +2,48 @@
 import { z } from "zod";
 import type { FormSubmitEvent } from "#ui/types";
 
-const toast = useToast();
+import { FormNoteSchema } from "@/dtos/note";
+import useNoteStore from "@/stores/note";
 
-// TODO: Model Note
+const emit = defineEmits(["success"]);
+
 const schema = z.object({
-  items: z.array(
-    z.object({
-      title: z.string().min(8, "Must be at least 8 characters"),
-      description: z.string().min(8, "Must be at least 8 characters"),
-    })
-  ),
+  items: z.array(FormNoteSchema),
 });
-
 type Schema = z.output<typeof schema>;
 
-const isOpen = ref(false);
-const loading = ref(false);
+const store = useNoteStore();
+const toast = useToast();
+
+const isOpen = ref<boolean>(false);
+const loading = ref<boolean>(false);
 
 const state = reactive({
-  items: [{ title: undefined, description: undefined }],
+  items: [{ title: "", description: "" }],
 });
 
 const addItem = () => {
-  state.items.push({ title: undefined, description: undefined });
+  state.items.push({ title: "", description: "" });
 };
 
 const removeItem = (index: number) => {
   state.items.splice(index, 1);
 };
 
-// TODO: Hit API
-async function onSubmit(event: FormSubmitEvent<Schema>) {
-  // Do something with data
+const onSubmit = async (event: FormSubmitEvent<Schema>) => {
+  event.preventDefault();
   loading.value = true;
-  console.log(event.data);
+  const { error } = await store.onAdd(event.data.items);
   loading.value = false;
+  if (error) {
+    toast.add({ title: "Add Note Failed", description: error, color: "red" });
+    return;
+  }
+  toast.add({ title: "Success Add New Notes", color: "green" });
   isOpen.value = false;
-  toast.add({ title: "Hello world!" });
-}
+  state.items = [{ title: "", description: "" }];
+  emit("success");
+};
 </script>
 
 <template>
@@ -78,9 +82,12 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
         </template>
         <template v-for="(item, index) in state.items" :key="index">
           <FormItem
-            :state="item"
-            :title="`items.${index}.title`"
-            :description="`items.${index}.description`"
+            v-model:title="item.title"
+            v-model:description="item.description"
+            :name="{
+              title: `items.${index}.title`,
+              description: `items.${index}.description`,
+            }"
           >
             <template #header>
               <h3
