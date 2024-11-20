@@ -37,6 +37,13 @@ const items = computed(() => {
     ],
   ];
 });
+
+const status = computed(() => {
+  if (props.data.status === Status.CANCELLED) {
+    return { color: "text-red-500", content: "CANCELLED" };
+  }
+  return { color: "text-green-500", content: "MARK AS DONE" };
+});
 </script>
 
 <template>
@@ -59,27 +66,34 @@ const items = computed(() => {
       {{ props.data.description }}
     </p>
     <template #footer>
-      <UButtonGroup size="sm" orientation="horizontal" class="w-full">
-        <UButton
-          color="red"
-          variant="outline"
-          trailing-icon="i-ic-baseline-close"
-          class="w-1/2 justify-center"
-          @click="
-            emits('status', {
-              id: props.data.id,
-              status: Status.CANCELLED,
-            })
-          "
-        />
-        <UButton
-          color="green"
-          variant="outline"
-          trailing-icon="i-ic-baseline-check"
-          class="w-1/2 justify-center"
-          @click="emits('status', { id: props.data.id, status: Status.DONE })"
-        />
-      </UButtonGroup>
+      <template v-if="props.data.status === Status.TODO">
+        <UButtonGroup size="sm" orientation="horizontal" class="w-full">
+          <UButton
+            color="red"
+            variant="outline"
+            trailing-icon="i-ic-baseline-close"
+            class="w-1/2 justify-center"
+            @click="
+              emits('status', {
+                id: props.data.id,
+                status: Status.CANCELLED,
+              })
+            "
+          />
+          <UButton
+            color="green"
+            variant="outline"
+            trailing-icon="i-ic-baseline-check"
+            class="w-1/2 justify-center"
+            @click="emits('status', { id: props.data.id, status: Status.DONE })"
+          />
+        </UButtonGroup>
+      </template>
+      <div v-else class="text-center">
+        <span :class="['prose prose-md font-bold', status.color]">{{
+          status.content
+        }}</span>
+      </div>
     </template>
   </UCard>
 </template>

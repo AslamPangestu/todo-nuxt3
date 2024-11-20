@@ -40,7 +40,6 @@ const CONFIG = {
 
 const {
   data: response,
-  error,
   refresh,
   status,
 } = await useAsyncData<Response<NoteResponseSchemaType>>(
@@ -160,40 +159,50 @@ const onStatus = (payload: { id: number; status: Status }) => {
     <section>
       <FormAdd @success="refresh" />
     </section>
-    <template v-if="status === 'pending'">
-      <span>Loading</span>
-    </template>
-    <template v-if="status === 'success'">
+    <template v-if="status === 'success' || status === 'pending'">
       <section
         class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4"
       >
-        <NoteItem
-          v-for="item in response?.data.data"
-          :key="item.id"
-          :data="item"
-          @edit="onEdit"
-          @delete="onDelete"
-          @unmark="onUnmark"
-          @status="onStatus"
-        />
+        <template v-if="status === 'success'">
+          <NoteItem
+            v-for="item in response?.data.data"
+            :key="item.id"
+            :data="item"
+            @edit="onEdit"
+            @delete="onDelete"
+            @unmark="onUnmark"
+            @status="onStatus"
+          />
+        </template>
+        <template v-if="status === 'pending'">
+          <NoteSkelton v-for="item in Array(4)" :key="item" />
+        </template>
       </section>
-      <section class="flex justify-center">
-        <UPagination
-          :model-value="response?.data.pagination.current_page ?? 1"
-          :page-count="PAGE_SIZE"
-          :total="response?.data.pagination.total ?? 1"
-          :show-last="response?.data.pagination.has_next"
-          :show-first="response?.data.pagination.has_prev"
-          :to="
-            (page: number) => ({
-              query: { page },
-            })
-          "
-        />
-      </section>
+      <template v-if="status === 'success'">
+        <section class="flex justify-center">
+          <UPagination
+            :model-value="response?.data.pagination.current_page ?? 1"
+            :page-count="PAGE_SIZE"
+            :total="response?.data.pagination.total ?? 1"
+            :show-last="response?.data.pagination.has_next"
+            :show-first="response?.data.pagination.has_prev"
+            :to="
+              (page: number) => ({
+                query: { page },
+              })
+            "
+          />
+        </section>
+      </template>
     </template>
     <template v-if="status === 'error'">
-      <span>{{ error }}</span>
+      <div class="flex gap-2 flex-col items-center justify-center">
+        <UIcon name="i-ic-baseline-dangerous" class="w-32 h-32 text-red-500" />
+        <span class="prose prose-2xl text-red-500">Something Wrong!!</span>
+        <p class="prose prose-base text-red-500">
+          Pleas Contact the administrator
+        </p>
+      </div>
     </template>
   </UContainer>
   <FormEdit v-model="isEdit" :data="editData" @success="onDoneEdit" />
