@@ -1,4 +1,4 @@
-# Nuxt Minimal Starter
+# Nuxt + Pinia
 
 Look at the [Nuxt documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
 
@@ -26,8 +26,3 @@ Build the application for production:
 docker build -t <image-name> .
 docker run -d --name <container-name> -p 127.0.0.1:3000:3000 <image-name>
 ```
-
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
-
-<!-- TODO -->
-## Technical Documentation
